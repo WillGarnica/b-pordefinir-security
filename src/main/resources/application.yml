@@ -1,0 +1,35 @@
+spring:
+
+  profiles:
+    active: local
+
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+
+  jwt:
+    secret.key: mySecretKeyEsUnaChimbamy-SecretKeyEsUnaChimba
+
+  datasource:
+    # BD in https://console.neon.tech/
+    host: localhost
+    database: security_DB
+    password: postgres
+    username: postgres
+    schema: security # schema by default
+
+  r2dbc:
+    url: r2dbc:postgresql://${spring.datasource.host}/${spring.datasource.database}?sslmode=require
+    password: ${spring.datasource.password}
+    username: ${spring.datasource.username}
+    schema: ${spring.datasource.schema}
+
+  flyway:
+    # If something changes here, keep in mind the FlywayConfig class.
+    url: jdbc:postgresql://${spring.datasource.host}/${spring.datasource.database}
+    locations: classpath:db/migration
+    password: ${spring.datasource.password}
+    user: ${spring.datasource.username}
+    schemas: ${spring.datasource.schema}
+    table: ${spring.datasource.schema}.flyway_schema_history  # para que la tabla flyway_schema_history se cree en el esquema security
+
+

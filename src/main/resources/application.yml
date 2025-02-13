@@ -10,7 +10,6 @@ spring:
     secret.key: mySecretKeyEsUnaChimbamy-SecretKeyEsUnaChimba
 
   datasource:
-    # BD in https://console.neon.tech/
     host: localhost
     database: security_DB
     password: postgres

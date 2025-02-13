@@ -1,10 +1,9 @@
 package com.garnicsoft.service;
 
-import com.garnicsoft.dto.BasicRegisterRequest;
-import com.garnicsoft.dto.LoginByEmailAndPassRequest;
-import com.garnicsoft.dto.LoginSuccessfulResponse;
+import com.garnicsoft.dto.BasicRegisterRequestDto;
+import com.garnicsoft.dto.LoginByEmailAndPassRequestDto;
+import com.garnicsoft.dto.LoginSuccessfulResponseDto;
 import com.garnicsoft.entity.User;
-import jakarta.validation.Valid;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -20,11 +19,15 @@ public class AuthService {
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
 
-  public Mono<LoginSuccessfulResponse> login(
-      @Valid LoginByEmailAndPassRequest loginByEmailAndPassRequest) {
+  public Mono<LoginSuccessfulResponseDto> login(LoginByEmailAndPassRequestDto loginInfo) {
+
+    if (loginInfo == null
+        || StringUtils.isBlank(loginInfo.getEmail())
+        || StringUtils.isBlank(loginInfo.getPass())) throw new IllegalArgumentException();
+
     return this.userService
-        .getUserByEmail(loginByEmailAndPassRequest.getEmail())
-        .filter(user -> arePassMatches(loginByEmailAndPassRequest.getPass(), user.getPassword()))
+        .getUserByEmail(loginInfo.getEmail())
+        .filter(user -> arePassMatches(loginInfo.getPass(), user.getPassword()))
         .map(this::getLoginResponseFromUser);
   }
 
@@ -35,19 +38,27 @@ public class AuthService {
     return passwordEncoder.matches(pass1, pass2);
   }
 
-  private LoginSuccessfulResponse getLoginResponseFromUser(User user) {
+  private LoginSuccessfulResponseDto getLoginResponseFromUser(User user) {
     if (user == null) return null;
 
     String authToken = jwtService.generateToken(user.getEmail(), Map.of("roles", Map.of()));
-    return LoginSuccessfulResponse.builder().authToken(authToken).active(user.isActive()).build();
+    return LoginSuccessfulResponseDto.builder()
+        .authToken(authToken)
+        .active(user.isActive())
+        .build();
   }
 
-  public Mono<LoginSuccessfulResponse> sigUpBasic(@Valid BasicRegisterRequest request) {
+  public Mono<LoginSuccessfulResponseDto> sigUpBasic(BasicRegisterRequestDto registerInfo) {
+
+    if (registerInfo == null
+        || StringUtils.isBlank(registerInfo.getEmail())
+        || StringUtils.isBlank(registerInfo.getPass())) throw new IllegalArgumentException();
+
     User user =
         User.builder()
-            .email(request.getEmail())
+            .email(registerInfo.getEmail())
             .active(true)
-            .password(passwordEncoder.encode(request.getPass()))
+            .password(passwordEncoder.encode(registerInfo.getPass()))
             .build();
 
     // un registro exitoso es similar a un login, por lo que se retorna un LoginSuccessfulResponse

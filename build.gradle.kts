@@ -29,6 +29,8 @@ dependencies {
     // Spring Security
     implementation("org.springframework.boot:spring-boot-starter-security")
 
+    implementation("org.springframework.boot:spring-boot-starter-validation:3.3.8")
+
     // JWT
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")

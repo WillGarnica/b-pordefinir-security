@@ -11,7 +11,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class LoginSuccessfulResponse extends UserDto implements Serializable {
+public class LoginSuccessfulResponseDto extends UserDto implements Serializable {
 
   private String authToken;
   private String refreshToken;

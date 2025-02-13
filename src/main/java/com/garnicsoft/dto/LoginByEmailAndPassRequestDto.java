@@ -1,5 +1,6 @@
 package com.garnicsoft.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import java.io.Serializable;
 import lombok.*;
@@ -9,9 +10,9 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginByEmailAndPassRequest implements Serializable {
+public class LoginByEmailAndPassRequestDto implements Serializable {
 
-  @NotBlank private String email;
+  @NotBlank @Email private String email;
 
   @NotBlank private String pass;
 }

@@ -19,7 +19,7 @@ public class SecurityConfig {
         .authorizeExchange(
             exchange ->
                 exchange
-                    .pathMatchers("/auth/login", "/auth/basic-register")
+                    .pathMatchers("/auth/login", "/auth/basic-register", "/actuator/**")
                     .permitAll()
                     .anyExchange()
                     .authenticated())

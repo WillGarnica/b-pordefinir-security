@@ -48,6 +48,9 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.36")
 
     implementation("jakarta.validation:jakarta.validation-api:3.0.1")
+
+    implementation("org.springframework.boot:spring-boot-starter-actuator:3.3.8")
+
 }
 
 tasks.test {

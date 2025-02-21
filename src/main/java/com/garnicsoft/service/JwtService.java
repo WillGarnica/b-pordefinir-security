@@ -36,12 +36,12 @@ public class JwtService {
 
   public String generateRefreshToken(String email, Map<String, Object> claims) {
     return generateToken(
-        email, claims, new Date(System.currentTimeMillis() + 100 * 60 * 60 * 24 * 30)); // 1 month
+        email, claims, new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 30))); // 1 month
   }
 
   public String generateAuthToken(String email, Map<String, Object> claims) {
     return generateToken(
-        email, claims, new Date(System.currentTimeMillis() + 100 * 60 * 60)); // 1 hour
+        email, claims, new Date(System.currentTimeMillis() + (1000 * 60 * 60))); // 1 hour
   }
 
   public String extractEmail(String token) {

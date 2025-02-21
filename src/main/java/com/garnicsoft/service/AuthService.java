@@ -41,9 +41,13 @@ public class AuthService {
   private LoginSuccessfulResponseDto getLoginResponseFromUser(User user) {
     if (user == null) return null;
 
-    String authToken = jwtService.generateToken(user.getEmail(), Map.of("roles", Map.of()));
+    Map<String, Object> rolesMap = Map.of("roles", Map.of());
+    String authToken = jwtService.generateAuthToken(user.getEmail(), rolesMap);
+    String refreshToken = jwtService.generateRefreshToken(user.getEmail(), rolesMap);
+
     return LoginSuccessfulResponseDto.builder()
         .authToken(authToken)
+        .refreshToken(refreshToken)
         .active(user.isActive())
         .build();
   }

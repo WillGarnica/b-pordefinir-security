@@ -7,7 +7,6 @@ import java.security.Key;
 import java.util.Date;
 import java.util.Map;
 import java.util.function.Function;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -24,14 +23,25 @@ public class JwtService {
     return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
   }
 
-  public String generateToken(String email, Map<String, Object> claims) {
+  public String generateToken(String email, Map<String, Object> claims, Date expirationDate) {
+    claims = claims == null ? Map.of() : claims;
     return Jwts.builder()
         .setClaims(claims)
         .setSubject(email)
         .setIssuedAt(new Date())
-        .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hora
+        .setExpiration(expirationDate)
         .signWith(getSigningKey(), SignatureAlgorithm.HS256)
         .compact();
+  }
+
+  public String generateRefreshToken(String email, Map<String, Object> claims) {
+    return generateToken(
+        email, claims, new Date(System.currentTimeMillis() + (100 * 60 * 60 * 24 * 30))); // 1 month
+  }
+
+  public String generateAuthToken(String email, Map<String, Object> claims) {
+    return generateToken(
+        email, claims, new Date(System.currentTimeMillis() + (100 * 60 * 60))); // 1 hour
   }
 
   public String extractEmail(String token) {

@@ -15,5 +15,4 @@ public class LoginSuccessfulResponseDto extends UserDto implements Serializable 
 
   private String authToken;
   private String refreshToken;
-  private String refreshTokenExpiresAt;
 }

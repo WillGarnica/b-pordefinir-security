@@ -1,26 +1,20 @@
 package com.garnicsoft.entity;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import java.time.LocalDateTime;
 import lombok.*;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 @Table(name = "security.users")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class User {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @Id private Long id;
 
-  @Column(unique = true)
   private String email;
 
   @Column private String password;
@@ -30,4 +24,10 @@ public class User {
   @Column private LocalDateTime createdAt;
 
   @Column private LocalDateTime updatedAt;
+
+  @Column private LocalDateTime lockedAt;
+
+  @Column private LocalDateTime lastFailedLoginAttemptDate;
+
+  @Column private Short failedLoginAttemptsAmount;
 }

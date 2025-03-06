@@ -31,4 +31,8 @@ spring:
     schemas: ${spring.datasource.schema}
     table: ${spring.datasource.schema}.flyway_schema_history  # para que la tabla flyway_schema_history se cree en el esquema security
 
-
+security:
+  login:
+    max.failed.attempts: 5
+    lock.time.minutes: 10
+    max.minutes.between.failed.attempts: 2 # Maximum time allowed between failed login attempts to take them into account in the sum of attempts, this to temporarily block the login for a specific user

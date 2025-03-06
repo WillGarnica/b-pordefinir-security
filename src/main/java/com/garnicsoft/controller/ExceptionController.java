@@ -5,8 +5,10 @@ import io.jsonwebtoken.lang.Collections;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.constraints.NotNull;
 import java.util.Arrays;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -16,6 +18,7 @@ import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @RestControllerAdvice
 public class ExceptionController {
 
@@ -55,7 +58,20 @@ public class ExceptionController {
     return Mono.just(errorDto);
   }
 
-  @ExceptionHandler(value = {IllegalArgumentException.class, ServerWebInputException.class})
+  @ExceptionHandler(
+      value = {
+        LockedException.class,
+      })
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  public Mono<ErrorDto> handleForbidden(@NotNull Exception e) {
+    return Mono.just(getErrorDtoFromException(e));
+  }
+
+  @ExceptionHandler(
+      value = {
+        IllegalArgumentException.class,
+        ServerWebInputException.class,
+      })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public Mono<ErrorDto> handle(@NotNull Exception e) {
     return Mono.just(getErrorDtoFromException(e));
@@ -81,6 +97,7 @@ public class ExceptionController {
   private ErrorDto getErrorDtoFromException(@NotNull Exception e) {
     if (e == null) return new ErrorDto();
 
+    log.error("ERROR: ", e);
     return ErrorDto.builder().message(e.getLocalizedMessage()).build();
   }
 }

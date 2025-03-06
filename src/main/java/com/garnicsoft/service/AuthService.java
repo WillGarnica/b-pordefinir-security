@@ -4,20 +4,33 @@ import com.garnicsoft.dto.BasicRegisterRequestDto;
 import com.garnicsoft.dto.LoginByEmailAndPassRequestDto;
 import com.garnicsoft.dto.LoginSuccessfulResponseDto;
 import com.garnicsoft.entity.User;
+import java.time.LocalDateTime;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 @Service
-@RequiredArgsConstructor
 public class AuthService {
 
   private final UserService userService;
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
+  private final int securityLoginLockTimeMinutes;
+
+  public AuthService(
+      UserService userService,
+      PasswordEncoder passwordEncoder,
+      JwtService jwtService,
+      @Value("${security.login.lock.time.minutes}") int securityLoginLockTimeMinutes) {
+    this.userService = userService;
+    this.passwordEncoder = passwordEncoder;
+    this.jwtService = jwtService;
+    this.securityLoginLockTimeMinutes = securityLoginLockTimeMinutes;
+  }
 
   public Mono<LoginSuccessfulResponseDto> login(LoginByEmailAndPassRequestDto loginInfo) {
 
@@ -27,15 +40,32 @@ public class AuthService {
 
     return this.userService
         .getUserByEmail(loginInfo.getEmail())
-        .filter(user -> arePassMatches(loginInfo.getPass(), user.getPassword()))
+        .filter(user -> !isFailedLoginAttemptsUserBlocked(user))
+        .filter(user -> arePassMatches(loginInfo.getPass(), user))
         .map(this::getLoginResponseFromUser);
   }
 
-  private boolean arePassMatches(String pass1, String pass2) {
-    if (StringUtils.isBlank(pass1) || StringUtils.isBlank(pass2))
+  private boolean isFailedLoginAttemptsUserBlocked(User user) {
+    if (user != null
+        && user.getLockedAt() != null
+        && user.getLockedAt()
+            .isAfter(LocalDateTime.now().minusMinutes(this.securityLoginLockTimeMinutes))) {
+      throw new LockedException("Too many login attempts for this user");
+    }
+
+    return false;
+  }
+
+  private boolean arePassMatches(String pass1, User user) {
+    if (user == null || StringUtils.isBlank(pass1) || StringUtils.isBlank(user.getPassword()))
       throw new IllegalArgumentException();
 
-    return passwordEncoder.matches(pass1, pass2);
+    boolean isCorrectPass = passwordEncoder.matches(pass1, user.getPassword());
+
+    if (isCorrectPass) userService.resetAmountFailedLoginAttempts(user).subscribe();
+    else userService.add1FailedLoginAttempt(user).subscribe();
+
+    return isCorrectPass;
   }
 
   private LoginSuccessfulResponseDto getLoginResponseFromUser(User user) {
